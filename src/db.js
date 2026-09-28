@@ -59,3 +59,18 @@ export function getSlots(db, walkDate) {
     )
     .all(walkDate);
 }
+
+export function bookSlot(db, walkDate, slotTime, name, bookedAt) {
+  const result = db
+    .prepare(
+      'UPDATE walk_slots SET booked_by = ?, booked_at = ? WHERE walk_date = ? AND slot_time = ? AND booked_by IS NULL'
+    )
+    .run(name, bookedAt, walkDate, slotTime);
+  return result.changes === 1;
+}
+
+export function getSlot(db, walkDate, slotTime) {
+  return db
+    .prepare('SELECT slot_time, booked_by, booked_at FROM walk_slots WHERE walk_date = ? AND slot_time = ?')
+    .get(walkDate, slotTime);
+}
