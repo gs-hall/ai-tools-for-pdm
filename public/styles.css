@@ -95,13 +95,13 @@ body {
   color: #cf222e;
 }
 
-.booking {
+.name-form {
   display: flex;
   flex: 1 1 100%;
   gap: 8px;
 }
 
-.booking__input {
+.name-form__input {
   flex: 1 1 auto;
   min-width: 0;
   padding: 10px 12px;
@@ -110,7 +110,7 @@ body {
   font: inherit;
 }
 
-.booking__button {
+.name-form__button {
   flex: 0 0 auto;
   padding: 10px 16px;
   border: none;
@@ -122,7 +122,19 @@ body {
   cursor: pointer;
 }
 
-.booking__button:disabled {
+.name-form__button:disabled {
   opacity: 0.6;
   cursor: default;
+}
+
+.feeding {
+  margin-top: 32px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.feeding__last {
+  margin: 0 0 12px;
+  font-size: 18px;
 }

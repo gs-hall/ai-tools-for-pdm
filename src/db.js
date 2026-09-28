@@ -74,3 +74,15 @@ export function getSlot(db, walkDate, slotTime) {
     .prepare('SELECT slot_time, booked_by, booked_at FROM walk_slots WHERE walk_date = ? AND slot_time = ?')
     .get(walkDate, slotTime);
 }
+
+export function addFeeding(db, name, fedAt) {
+  db.prepare('INSERT INTO feedings (employee_name, fed_at) VALUES (?, ?)').run(name, fedAt);
+}
+
+export function getLastFeeding(db) {
+  return (
+    db
+      .prepare('SELECT employee_name, fed_at FROM feedings ORDER BY fed_at DESC, id DESC LIMIT 1')
+      .get() ?? null
+  );
+}

@@ -2,7 +2,16 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { openDatabase, ensureSlots, getSlots, getSlot, bookSlot, SLOT_TIMES } from './src/db.js';
+import {
+  openDatabase,
+  ensureSlots,
+  getSlots,
+  getSlot,
+  bookSlot,
+  addFeeding,
+  getLastFeeding,
+  SLOT_TIMES,
+} from './src/db.js';
 
 const PORT = Number(process.env.PORT) || 3000;
 const MAX_BODY_BYTES = 10_000;
@@ -16,6 +25,8 @@ const STATIC_FILES = {
 };
 
 const db = openDatabase();
+
+class BadRequestError extends Error {}
 
 function today() {
   const now = new Date();
@@ -36,65 +47,75 @@ function readJson(req) {
     req.on('data', (chunk) => {
       body += chunk;
       if (body.length > MAX_BODY_BYTES) {
-        reject(new Error('Слишком большой запрос.'));
+        reject(new BadRequestError('Слишком большой запрос.'));
         req.destroy();
       }
     });
     req.on('end', () => {
       try {
-        resolve(JSON.parse(body));
+        resolve(JSON.parse(body) ?? {});
       } catch {
-        reject(new Error('Некорректный запрос.'));
+        reject(new BadRequestError('Некорректный запрос.'));
       }
     });
     req.on('error', reject);
   });
 }
 
-function normalizeName(value) {
-  return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : '';
+function validateName(value) {
+  const name = typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : '';
+  if (!name) {
+    return { error: 'Введите ФИО.' };
+  }
+  if (name.length > MAX_NAME_LENGTH) {
+    return { error: `ФИО не длиннее ${MAX_NAME_LENGTH} символов.` };
+  }
+  return { name };
+}
+
+function slotsState() {
+  const walkDate = today();
+  ensureSlots(db, walkDate);
+  return { date: walkDate, slots: getSlots(db, walkDate) };
 }
 
 async function handleBooking(req, res) {
-  let payload;
-  try {
-    payload = await readJson(req);
-  } catch (error) {
-    sendJson(res, 400, { error: error.message });
-    return;
-  }
-
-  const { slotTime, name: rawName } = payload ?? {};
-  const name = normalizeName(rawName);
-  const walkDate = today();
+  const { slotTime, name: rawName } = await readJson(req);
 
   if (!SLOT_TIMES.includes(slotTime)) {
     sendJson(res, 400, { error: 'Такого слота нет.' });
     return;
   }
-  if (!name) {
-    sendJson(res, 400, { error: 'Введите ФИО.' });
-    return;
-  }
-  if (name.length > MAX_NAME_LENGTH) {
-    sendJson(res, 400, { error: `ФИО не длиннее ${MAX_NAME_LENGTH} символов.` });
+  const { name, error } = validateName(rawName);
+  if (error) {
+    sendJson(res, 400, { error });
     return;
   }
 
+  const walkDate = today();
   ensureSlots(db, walkDate);
-  const booked = bookSlot(db, walkDate, slotTime, name, new Date().toISOString());
-
-  if (!booked) {
+  if (!bookSlot(db, walkDate, slotTime, name, new Date().toISOString())) {
     const slot = getSlot(db, walkDate, slotTime);
     sendJson(res, 409, {
       error: `Слот ${slotTime} уже занят: ${slot.booked_by}. Выберите другой свободный слот.`,
-      date: walkDate,
-      slots: getSlots(db, walkDate),
+      ...slotsState(),
     });
     return;
   }
 
-  sendJson(res, 200, { date: walkDate, slots: getSlots(db, walkDate) });
+  sendJson(res, 200, slotsState());
+}
+
+async function handleFeeding(req, res) {
+  const { name: rawName } = await readJson(req);
+  const { name, error } = validateName(rawName);
+  if (error) {
+    sendJson(res, 400, { error });
+    return;
+  }
+
+  addFeeding(db, name, new Date().toISOString());
+  sendJson(res, 200, { lastFeeding: getLastFeeding(db) });
 }
 
 async function sendStatic(res, { file, type }) {
@@ -103,27 +124,44 @@ async function sendStatic(res, { file, type }) {
   res.end(content);
 }
 
-const server = createServer(async (req, res) => {
+async function route(req, res) {
   const { pathname } = new URL(req.url, `http://${req.headers.host}`);
 
   if (req.method === 'GET' && pathname === '/api/slots') {
-    const walkDate = today();
-    ensureSlots(db, walkDate);
-    sendJson(res, 200, { date: walkDate, slots: getSlots(db, walkDate) });
+    sendJson(res, 200, slotsState());
     return;
   }
-
   if (req.method === 'POST' && pathname === '/api/bookings') {
     await handleBooking(req, res);
     return;
   }
-
+  if (req.method === 'GET' && pathname === '/api/feedings/last') {
+    sendJson(res, 200, { lastFeeding: getLastFeeding(db) });
+    return;
+  }
+  if (req.method === 'POST' && pathname === '/api/feedings') {
+    await handleFeeding(req, res);
+    return;
+  }
   if (req.method === 'GET' && STATIC_FILES[pathname]) {
     await sendStatic(res, STATIC_FILES[pathname]);
     return;
   }
 
-  sendJson(res, 404, { error: 'Не найдено' });
+  sendJson(res, 404, { error: 'Не найдено.' });
+}
+
+const server = createServer(async (req, res) => {
+  try {
+    await route(req, res);
+  } catch (error) {
+    if (error instanceof BadRequestError) {
+      sendJson(res, 400, { error: error.message });
+      return;
+    }
+    console.error(error);
+    sendJson(res, 500, { error: 'Внутренняя ошибка сервера.' });
+  }
 });
 
 ensureSlots(db, today());

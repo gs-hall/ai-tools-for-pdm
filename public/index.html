@@ -14,8 +14,14 @@
     </header>
     <section aria-labelledby="slots-title">
       <h2 class="section-title" id="slots-title">Прогулки на сегодня</h2>
-      <p class="notice" id="notice" role="status" hidden></p>
+      <p class="notice" id="slots-notice" role="status" hidden></p>
       <ul class="slots" id="slots"></ul>
+    </section>
+    <section class="feeding" aria-labelledby="feeding-title">
+      <h2 class="section-title" id="feeding-title">Последнее кормление</h2>
+      <p class="notice" id="feeding-notice" role="status" hidden></p>
+      <p class="feeding__last" id="feeding-last">Загрузка…</p>
+      <div id="feeding-form"></div>
     </section>
   </main>
   <script src="/app.js"></script>
