@@ -1,0 +1,14 @@
+{
+  "name": "who-walks-boris",
+  "version": "0.1.0",
+  "description": "Учебный micro-MVP «Кто выгуливает Бориса»",
+  "private": true,
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}
