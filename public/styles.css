@@ -1,0 +1,165 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  color: #1f2328;
+  background: #f6f7f9;
+}
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.header__title {
+  margin: 0 0 4px;
+  font-size: 28px;
+}
+
+.header__date {
+  margin: 0 0 24px;
+  color: #57606a;
+  font-size: 18px;
+}
+
+.section-title {
+  margin: 0 0 12px;
+  font-size: 20px;
+}
+
+.slots {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.slot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 16px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+}
+
+.slot__time {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.slot__status {
+  min-width: 0;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+.slot_free {
+  border-color: #2da44e;
+  background: #ffffff;
+}
+
+.slot_free .slot__status {
+  color: #1a7f37;
+}
+
+.slot_booked {
+  background: #eaeef2;
+  color: #57606a;
+}
+
+.slot_booked .slot__status {
+  font-weight: 600;
+  color: #1f2328;
+}
+
+.notice {
+  margin: 0 0 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.notice_success {
+  background: #dafbe1;
+  color: #1a7f37;
+}
+
+.notice_error {
+  background: #ffebe9;
+  color: #cf222e;
+}
+
+.name-form {
+  display: flex;
+  flex: 1 1 100%;
+  gap: 8px;
+}
+
+.name-form__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.name-form__button {
+  flex: 0 0 auto;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #2da44e;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.name-form__button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.feeding {
+  margin-top: 32px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.feeding__last {
+  margin: 0 0 12px;
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 16px 12px;
+  }
+
+  .header__title {
+    font-size: 24px;
+  }
+
+  .header__date {
+    font-size: 16px;
+  }
+
+  .name-form {
+    flex-direction: column;
+  }
+
+  .name-form__button {
+    width: 100%;
+  }
+}

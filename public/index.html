@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Кто выгуливает Бориса</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <h1 class="header__title">Кто выгуливает Бориса</h1>
+      <p class="header__date" id="walk-date">Загрузка…</p>
+    </header>
+    <section aria-labelledby="slots-title">
+      <h2 class="section-title" id="slots-title">Прогулки на сегодня</h2>
+      <p class="notice" id="slots-notice" role="status" hidden></p>
+      <ul class="slots" id="slots"></ul>
+    </section>
+    <section class="feeding" aria-labelledby="feeding-title">
+      <h2 class="section-title" id="feeding-title">Последнее кормление</h2>
+      <p class="notice" id="feeding-notice" role="status" hidden></p>
+      <p class="feeding__last" id="feeding-last">Загрузка…</p>
+      <div id="feeding-form"></div>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
