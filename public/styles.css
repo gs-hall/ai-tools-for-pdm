@@ -56,7 +56,9 @@ body {
 }
 
 .slot__status {
+  min-width: 0;
   font-size: 16px;
+  overflow-wrap: anywhere;
 }
 
 .slot_free {
@@ -137,4 +139,27 @@ body {
 .feeding__last {
   margin: 0 0 12px;
   font-size: 18px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 16px 12px;
+  }
+
+  .header__title {
+    font-size: 24px;
+  }
+
+  .header__date {
+    font-size: 16px;
+  }
+
+  .name-form {
+    flex-direction: column;
+  }
+
+  .name-form__button {
+    width: 100%;
+  }
 }
