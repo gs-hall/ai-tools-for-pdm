@@ -33,11 +33,15 @@ class HttpError extends Error {
   }
 }
 
+const moscowDateFormat = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Europe/Moscow',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
 function today() {
-  const now = new Date();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${now.getFullYear()}-${month}-${day}`;
+  return moscowDateFormat.format(new Date());
 }
 
 function sendJson(res, status, body) {

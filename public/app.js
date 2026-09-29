@@ -16,12 +16,14 @@ function formatDate(isoDate) {
 }
 
 function formatDateTime(isoDateTime) {
-  return new Date(isoDateTime).toLocaleString('ru-RU', {
+  const moscowTime = new Date(isoDateTime).toLocaleString('ru-RU', {
+    timeZone: 'Europe/Moscow',
     day: 'numeric',
     month: 'long',
     hour: '2-digit',
     minute: '2-digit',
   });
+  return `${moscowTime} МСК`;
 }
 
 function showNotice(element, text, type) {
