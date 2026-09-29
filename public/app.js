@@ -41,17 +41,23 @@ async function postJson(url, body) {
   return { ok: response.ok, data: await response.json() };
 }
 
-function createNameForm({ label, buttonText, onSubmit }) {
+function createNameForm({ id, label, buttonText, onSubmit }) {
   const form = document.createElement('form');
   form.className = 'name-form';
 
+  const labelElement = document.createElement('label');
+  labelElement.className = 'name-form__label';
+  labelElement.htmlFor = id;
+  labelElement.textContent = 'ФИО';
+
   const input = document.createElement('input');
   input.className = 'name-form__input';
+  input.id = id;
   input.name = 'name';
   input.type = 'text';
   input.required = true;
   input.maxLength = 100;
-  input.placeholder = 'ФИО';
+  input.placeholder = 'Например, Анна Тестова';
   input.setAttribute('aria-label', label);
 
   const button = document.createElement('button');
@@ -59,7 +65,11 @@ function createNameForm({ label, buttonText, onSubmit }) {
   button.type = 'submit';
   button.textContent = buttonText;
 
-  form.append(input, button);
+  const row = document.createElement('div');
+  row.className = 'name-form__row';
+  row.append(input, button);
+
+  form.append(labelElement, row);
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     button.disabled = true;
@@ -88,6 +98,7 @@ function renderSlot(slot) {
   if (!slot.booked_by) {
     item.append(
       createNameForm({
+        id: `name-${slot.slot_time.replace(':', '-')}`,
         label: `ФИО для записи на ${slot.slot_time}`,
         buttonText: 'Записаться',
         onSubmit: (name) => bookSlot(slot.slot_time, name),
@@ -173,6 +184,7 @@ async function markFeeding(name, input) {
 
 feedingFormElement.replaceWith(
   createNameForm({
+    id: 'name-feeding',
     label: 'ФИО того, кто покормил Бориса',
     buttonText: 'Отметить кормление',
     onSubmit: markFeeding,

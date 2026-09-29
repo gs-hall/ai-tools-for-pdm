@@ -100,6 +100,18 @@ body {
 .name-form {
   display: flex;
   flex: 1 1 100%;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.name-form__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #57606a;
+}
+
+.name-form__row {
+  display: flex;
   gap: 8px;
 }
 
@@ -155,7 +167,7 @@ body {
     font-size: 16px;
   }
 
-  .name-form {
+  .name-form__row {
     flex-direction: column;
   }
 
