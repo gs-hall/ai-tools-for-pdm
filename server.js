@@ -26,7 +26,12 @@ const STATIC_FILES = {
 
 const db = openDatabase();
 
-class BadRequestError extends Error {}
+class HttpError extends Error {
+  constructor(status, message) {
+    super(message);
+    this.status = status;
+  }
+}
 
 function today() {
   const now = new Date();
@@ -36,26 +41,44 @@ function today() {
 }
 
 function sendJson(res, status, body) {
-  res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
+  res.writeHead(status, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store',
+  });
   res.end(JSON.stringify(body));
 }
 
 function readJson(req) {
   return new Promise((resolve, reject) => {
-    let body = '';
-    req.setEncoding('utf8');
+    const contentType = req.headers['content-type'] ?? '';
+    if (!contentType.startsWith('application/json')) {
+      req.resume();
+      reject(new HttpError(415, 'Поддерживается только JSON.'));
+      return;
+    }
+
+    const chunks = [];
+    let size = 0;
+    let tooLarge = Number(req.headers['content-length']) > MAX_BODY_BYTES;
+
     req.on('data', (chunk) => {
-      body += chunk;
-      if (body.length > MAX_BODY_BYTES) {
-        reject(new BadRequestError('Слишком большой запрос.'));
-        req.destroy();
+      size += chunk.length;
+      if (size > MAX_BODY_BYTES) {
+        tooLarge = true;
+      }
+      if (!tooLarge) {
+        chunks.push(chunk);
       }
     });
     req.on('end', () => {
+      if (tooLarge) {
+        reject(new HttpError(413, 'Слишком большой запрос.'));
+        return;
+      }
       try {
-        resolve(JSON.parse(body) ?? {});
+        resolve(JSON.parse(Buffer.concat(chunks).toString('utf8')) ?? {});
       } catch {
-        reject(new BadRequestError('Некорректный запрос.'));
+        reject(new HttpError(400, 'Некорректный запрос.'));
       }
     });
     req.on('error', reject);
@@ -120,7 +143,7 @@ async function handleFeeding(req, res) {
 
 async function sendStatic(res, { file, type }) {
   const content = await readFile(join(PUBLIC_DIR, file));
-  res.writeHead(200, { 'Content-Type': type });
+  res.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'no-store' });
   res.end(content);
 }
 
@@ -155,8 +178,8 @@ const server = createServer(async (req, res) => {
   try {
     await route(req, res);
   } catch (error) {
-    if (error instanceof BadRequestError) {
-      sendJson(res, 400, { error: error.message });
+    if (error instanceof HttpError) {
+      sendJson(res, error.status, { error: error.message });
       return;
     }
     console.error(error);
