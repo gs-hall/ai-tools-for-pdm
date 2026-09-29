@@ -196,3 +196,15 @@ ensureSlots(db, today());
 server.listen(PORT, () => {
   console.log(`Сервер запущен: http://localhost:${PORT}`);
 });
+
+function shutdown() {
+  server.close(() => {
+    db.close();
+    console.log('Сервер остановлен.');
+    process.exit(0);
+  });
+  server.closeIdleConnections();
+}
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
